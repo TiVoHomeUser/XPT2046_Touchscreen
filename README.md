@@ -52,6 +52,9 @@ or with getPoint(), which returns a TS_Point object:
       Serial.print(p.y);
 
 The Z coordinate represents the amount of pressure applied to the screen.
+	change the default touch pressure if needed
+	
+	ts.setTouch(pressure);
 
 ## Adafruit Library Compatibility
 

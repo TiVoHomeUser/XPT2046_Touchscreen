@@ -61,12 +61,13 @@ public:
 	bool bufferEmpty();
 	uint8_t bufferSize() { return 1; }
 	void setRotation(uint8_t n) { rotation = n % 4; }
+	void setTouchPressure(uint16_t pressure);
 // protected:
 	volatile bool isrWake=true;
-
 private:
 	void update();
 	uint8_t csPin, tirqPin, rotation=1;
+	uint16_t z_threshold=400;
 	int16_t xraw=0, yraw=0, zraw=0;
 	uint32_t msraw=0x80000000;
 	SPIClass *_pspi = nullptr;

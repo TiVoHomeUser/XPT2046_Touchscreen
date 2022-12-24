@@ -22,7 +22,7 @@
 
 #include "XPT2046_Touchscreen.h"
 
-#define Z_THRESHOLD     300
+//#define Z_THRESHOLD     400 Replaced with member uint16_t z_threshold=400; Dec 2022
 #define Z_THRESHOLD_INT	75
 #define MSEC_THRESHOLD  3
 #define SPI_SETTING     SPISettings(2000000, MSBFIRST, SPI_MODE0)
@@ -84,7 +84,11 @@ bool XPT2046_Touchscreen::tirqTouched()
 bool XPT2046_Touchscreen::touched()
 {
 	update();
-	return (zraw >= Z_THRESHOLD);
+	return (zraw >= z_threshold);
+}
+
+void XPT2046_Touchscreen::setTouchPressure(uint16_t pressure){
+	z_threshold = pressure;
 }
 
 void XPT2046_Touchscreen::readData(uint16_t *x, uint16_t *y, uint8_t *z)
@@ -132,7 +136,7 @@ void XPT2046_Touchscreen::update()
 		z = z1 + 4095;
 		int16_t z2 = _pspi->transfer16(0x91 /* X */) >> 3;
 		z -= z2;
-		if (z >= Z_THRESHOLD) {
+		if (z >= z_threshold) {
 			_pspi->transfer16(0x91 /* X */);  // dummy X measure, 1st is always noisy
 			data[0] = _pspi->transfer16(0xD1 /* Y */) >> 3;
 			data[1] = _pspi->transfer16(0x91 /* X */) >> 3; // make 3 x-y measurements
@@ -154,7 +158,7 @@ void XPT2046_Touchscreen::update()
 		z = z1 + 4095;
 		int16_t z2 = _pflexspi->transfer16(0x91 /* X */) >> 3;
 		z -= z2;
-		if (z >= Z_THRESHOLD) {
+		if (z >= z_threshold) {
 			_pflexspi->transfer16(0x91 /* X */);  // dummy X measure, 1st is always noisy
 			data[0] = _pflexspi->transfer16(0xD1 /* Y */) >> 3;
 			data[1] = _pflexspi->transfer16(0x91 /* X */) >> 3; // make 3 x-y measurements
@@ -174,7 +178,7 @@ void XPT2046_Touchscreen::update()
 
 	//Serial.printf("z=%d  ::  z1=%d,  z2=%d  ", z, z1, z2);
 	if (z < 0) z = 0;
-	if (z < Z_THRESHOLD) { //	if ( !touched ) {
+	if (z < z_threshold) { //	if ( !touched ) {
 		// Serial.println();
 		zraw = 0;
 		if (z < Z_THRESHOLD_INT) { //	if ( !touched ) {
@@ -193,7 +197,7 @@ void XPT2046_Touchscreen::update()
 	
 	//Serial.printf("    %d,%d", x, y);
 	//Serial.println();
-	if (z >= Z_THRESHOLD) {
+	if (z >= z_threshold) {
 		msraw = now;	// good read completed, set wait
 		switch (rotation) {
 		  case 0:
